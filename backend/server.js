@@ -147,7 +147,7 @@ app.post('/api/agents', authenticateUser, async (req, res) => {
     }
 
     // Validar que el modelo sea válido
-    const validModels = ['claude-3-5-sonnet-20241022', 'gpt-4', 'gemini-pro'];
+    const validModels = ['claude-3-5-sonnet-20241022', 'gpt-4', 'gemini-2.5-flash'];
     if (!validModels.includes(model)) {
       return res.status(400).json({ 
         error: `Modelo inválido. Debe ser uno de: ${validModels.join(', ')}` 
