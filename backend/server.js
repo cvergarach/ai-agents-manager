@@ -325,9 +325,9 @@ app.post('/api/chat', authenticateUser, async (req, res) => {
       });
       aiResponse = response.choices[0].message.content;
 
-    } else if (agent.model === 'gemini-pro') {
+    } else if (agent.model === 'gemini-2.5-flash') {
       // Gemini
-      const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       
       // Gemini necesita formato diferente
       const chat = model.startChat({
