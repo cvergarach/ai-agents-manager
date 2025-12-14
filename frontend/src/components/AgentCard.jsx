@@ -11,8 +11,8 @@ const MODEL_INFO = {
     color: '#10a37f',
     icon: '🤖'
   },
-  'gemini-pro': {
-    name: 'Gemini Pro',
+  'gemini-2.5-flash': {
+    name: 'gemini-2.5-flash',
     color: '#4285f4',
     icon: '✨'
   }

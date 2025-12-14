@@ -78,7 +78,7 @@ export default function AgentForm({ agent, onSave, onCancel }) {
             >
               <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (Anthropic)</option>
               <option value="gpt-4">GPT-4 (OpenAI)</option>
-              <option value="">gemini-2.5-flash (Google)</option>
+              <option value="gemini-2.5-flash">gemini-2.5-flash (Google)</option>
             </select>
           </div>
 
