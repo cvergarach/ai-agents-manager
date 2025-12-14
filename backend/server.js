@@ -48,6 +48,10 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// ✅ AGREGAR ESTAS LÍNEAS
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Middleware de autenticación
 const authenticateUser = async (req, res, next) => {
   const authHeader = req.headers.authorization;
