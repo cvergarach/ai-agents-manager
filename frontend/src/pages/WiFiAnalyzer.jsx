@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import API_URL from '../lib/config'
 import '../styles/WiFiAnalyzer.css'
 
 export default function WiFiAnalyzer() {
@@ -25,7 +26,7 @@ export default function WiFiAnalyzer() {
         try {
             const { data: { session } } = await supabase.auth.getSession()
 
-            const response = await fetch('http://localhost:3000/api/wifi/analyze', {
+            const response = await fetch(`${API_URL}/api/wifi/analyze`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,7 +64,7 @@ export default function WiFiAnalyzer() {
         try {
             const { data: { session } } = await supabase.auth.getSession()
 
-            const response = await fetch('http://localhost:3000/api/wifi/analyze-bulk', {
+            const response = await fetch(`${API_URL}/api/wifi/analyze-bulk`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,7 +98,7 @@ export default function WiFiAnalyzer() {
         try {
             const { data: { session } } = await supabase.auth.getSession()
 
-            const response = await fetch('http://localhost:3000/api/wifi/chat', {
+            const response = await fetch(`${API_URL}/api/wifi/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
