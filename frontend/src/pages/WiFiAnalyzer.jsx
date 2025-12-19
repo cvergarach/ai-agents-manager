@@ -46,6 +46,14 @@ export default function WiFiAnalyzer() {
             setChatHistory([])
         } catch (error) {
             console.error('Error:', error)
+            // Mostrar datos técnicos incluso si falla el análisis de IA
+            setResult({
+                mac: mac.toUpperCase(),
+                technicalData: error.response?.technicalData || 'Error al obtener datos técnicos',
+                analysis: `Error al analizar: ${error.message}`,
+                timestamp: new Date().toISOString()
+            })
+            setActiveTab('technical')
             alert(`Error: ${error.message}`)
         } finally {
             setLoading(false)
@@ -148,10 +156,26 @@ export default function WiFiAnalyzer() {
                             borderRadius: '6px',
                             cursor: 'pointer',
                             marginBottom: '10px',
+                            marginRight: '10px',
                             fontSize: '14px'
                         }}
                     >
                         ← Volver al Dashboard
+                    </button>
+                    <button
+                        onClick={() => window.location.href = '/wifi/config'}
+                        style={{
+                            background: 'rgba(255,255,255,0.2)',
+                            border: 'none',
+                            color: 'white',
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            marginBottom: '10px',
+                            fontSize: '14px'
+                        }}
+                    >
+                        ⚙️ Configurar Prompts
                     </button>
                     <h1>🌐 Analizador WiFi Gateway</h1>
                     <p>Diagnóstico técnico de gateways residenciales</p>
@@ -181,7 +205,9 @@ export default function WiFiAnalyzer() {
                             placeholder="MAC Address (ej: 78EB46AB75CA)"
                             value={mac}
                             onChange={(e) => setMac(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && analyzeSingle()}
                             maxLength={17}
+                            autoFocus
                         />
                         <button onClick={analyzeSingle} disabled={loading}>
                             {loading ? '⏳ Analizando...' : '🔍 Analizar'}

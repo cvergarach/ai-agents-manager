@@ -3,6 +3,7 @@ import { supabase } from './lib/supabase'
 import Auth from './components/Auth'
 import Dashboard from './pages/Dashboard'
 import WiFiAnalyzer from './pages/WiFiAnalyzer'
+import PromptConfig from './pages/PromptConfig'
 import './styles/App.css'
 
 export default function App() {
@@ -28,6 +29,8 @@ export default function App() {
     const path = window.location.pathname
     if (path === '/wifi') {
       setCurrentPage('wifi')
+    } else if (path === '/wifi/config') {
+      setCurrentPage('config')
     } else {
       setCurrentPage('dashboard')
     }
@@ -35,7 +38,13 @@ export default function App() {
     // Listen to popstate for back/forward navigation
     const handlePopState = () => {
       const path = window.location.pathname
-      setCurrentPage(path === '/wifi' ? 'wifi' : 'dashboard')
+      if (path === '/wifi') {
+        setCurrentPage('wifi')
+      } else if (path === '/wifi/config') {
+        setCurrentPage('config')
+      } else {
+        setCurrentPage('dashboard')
+      }
     }
     window.addEventListener('popstate', handlePopState)
 
@@ -60,6 +69,10 @@ export default function App() {
   // Render based on current page
   if (currentPage === 'wifi') {
     return <WiFiAnalyzer />
+  }
+
+  if (currentPage === 'config') {
+    return <PromptConfig />
   }
 
   return <Dashboard />
