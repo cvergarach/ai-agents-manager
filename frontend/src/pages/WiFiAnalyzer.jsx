@@ -5,7 +5,7 @@ import '../styles/WiFiAnalyzer.css'
 
 export default function WiFiAnalyzer() {
     const [mode, setMode] = useState('single')
-    const [mac, setMac] = useState('')
+    const [mac, setMac] = useState('78EB46AB75CA')
     const [macs, setMacs] = useState([])
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState(null)
