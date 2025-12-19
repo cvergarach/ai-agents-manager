@@ -1,13 +1,13 @@
 /* DL prefix is used to avoid collisions with global App.css */
 .dl-landing-page {
-    --dl-bg: #06090f;
-    /* Matched to the logo image background */
-    --dl-surface: #0d1117;
-    --dl-border: #1e293b;
+    --dl-bg: #030712;
+    /* Deep dark navy from image */
+    --dl-surface: #0f172a;
+    --dl-border: rgba(255, 255, 255, 0.05);
     --dl-primary: #3b82f6;
-    --dl-text-main: #f8fafc;
-    --dl-text-alt: #94a3b8;
-    --dl-nav-h: 80px;
+    --dl-text-main: #ffffff;
+    --dl-text-alt: #9ca3af;
+    --dl-nav-h: 72px;
 
     min-height: 100vh;
     background-color: var(--dl-bg) !important;
@@ -15,28 +15,74 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     line-height: 1.6;
     display: block !important;
-    /* Forces block layout to override global flex */
-    text-align: left;
+    text-align: center;
+    /* Center everything by default for hero focus */
     overflow-x: hidden;
     margin: 0;
     padding: 0;
 }
 
-/* Navbar */
+/* Navbar matching mockup */
 .dl-navbar {
     height: var(--dl-nav-h);
-    display: grid !important;
-    grid-template-columns: 100px 1fr 100px;
-    /* Split for centering */
+    display: flex !important;
+    justify-content: space-between;
     align-items: center;
-    padding: 0 5%;
-    background: var(--dl-bg);
-    position: fixed;
+    padding: 0 8%;
+    background: transparent;
+    position: absolute;
+    /* Floating over the background */
     top: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
-    border-bottom: 1px solid var(--dl-border);
+}
+
+.dl-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dl-nav-logo-text {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: white;
+    opacity: 0.9;
+}
+
+.dl-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.dl-nav-link {
+    color: white;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.dl-nav-link:hover {
+    opacity: 1;
+}
+
+.dl-btn-ingresar {
+    background: white;
+    color: black;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    letter-spacing: 1px;
 }
 
 .dl-logo {
@@ -61,44 +107,111 @@
     display: block;
 }
 
-/* Hero Section */
+/* Hero Area matching mockup */
 .dl-hero {
-    padding: 160px 5% 80px;
+    padding: 160px 5% 100px;
     max-width: 1200px;
     margin: 0 auto;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.dl-tag {
-    display: inline-block;
-    padding: 4px 14px;
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--dl-primary);
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: 24px;
-}
-
-.dl-hero h1 {
-    font-size: clamp(36px, 7vw, 68px);
-    font-weight: 800;
-    letter-spacing: -2px;
-    line-height: 1.1;
-    margin-bottom: 24px;
+.dl-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 99px;
     color: white;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 60px;
 }
 
-.dl-hero .highlight {
-    color: var(--dl-primary);
+.dl-hero-logo {
+    height: 50px;
+    margin-bottom: 30px;
+}
+
+.dl-hero-title {
+    font-size: clamp(60px, 12vw, 140px);
+    font-weight: 900;
+    letter-spacing: -4px;
+    line-height: 0.9;
+    margin-bottom: 20px;
+    color: white;
+    display: flex;
+    align-items: baseline;
+}
+
+.dl-hero-title span {
+    opacity: 0.3;
+    /* Greyed out part like in image */
+}
+
+.dl-tagline {
+    font-size: clamp(28px, 6vw, 64px);
+    font-weight: 700;
+    line-height: 1.1;
+    color: white;
+    margin-bottom: 32px;
+}
+
+.dl-gradient-text {
+    background: linear-gradient(90deg, #3b82f6, #ec4899, #f59e0b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .dl-hero-desc {
-    font-size: 19px;
-    color: var(--dl-text-alt);
-    max-width: 680px;
+    font-size: 16px;
+    color: #94a3b8;
+    max-width: 600px;
     margin: 0 auto 48px;
+    line-height: 1.6;
+    opacity: 0.8;
+}
+
+/* Hero Buttons */
+.dl-hero-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.dl-btn-google {
+    background: white;
+    color: black;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.dl-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 /* Login Button */
