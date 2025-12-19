@@ -8,6 +8,7 @@ export default function WiFiAnalyzer() {
     const [mac, setMac] = useState('78EB46AB75CA')
     const [macs, setMacs] = useState([])
     const [loading, setLoading] = useState(false)
+    const [progress, setProgress] = useState([])
     const [result, setResult] = useState(null)
     const [bulkResults, setBulkResults] = useState([])
     const [chatHistory, setChatHistory] = useState([])
@@ -21,43 +22,72 @@ export default function WiFiAnalyzer() {
         }
 
         setLoading(true)
-        setResult(null)
+        setResult({
+            mac: mac.toUpperCase(),
+            technicalData: '',
+            analysis: '',
+            timestamp: new Date().toISOString()
+        })
+        setProgress([])
+        setActiveTab('technical') // Mostrar datos técnicos desde el inicio
 
         try {
             const { data: { session } } = await supabase.auth.getSession()
+            const token = session.access_token
 
-            const response = await fetch(`${API_URL}/api/wifi/analyze`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({ mac: mac.toUpperCase().replace(/[:-]/g, '') })
-            })
+            // Usar EventSource para SSE
+            const url = `${API_URL}/api/wifi/analyze-stream?mac=${mac.toUpperCase()}&token=${token}`
+            const eventSource = new EventSource(url)
 
-            if (!response.ok) {
-                const error = await response.json()
-                throw new Error(error.error || 'Error al analizar')
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data)
+
+                if (data.type === 'progress') {
+                    setProgress(prev => [...prev.slice(-4), data.content])
+                }
+
+                if (data.type === 'technicalData') {
+                    setResult(prev => ({ ...prev, technicalData: data.content }))
+                }
+
+                if (data.type === 'analysis') {
+                    setResult(prev => ({ ...prev, analysis: data.content }))
+                    setActiveTab('report')
+                }
+
+                if (data.type === 'error') {
+                    alert(`Error: ${data.content}`)
+                    eventSource.close()
+                    setLoading(false)
+                }
+
+                if (data.type === 'done') {
+                    eventSource.close()
+                    setLoading(false)
+                }
             }
 
-            const data = await response.json()
-            setResult(data)
-            setActiveTab('report')
-            setChatHistory([])
+            eventSource.onerror = (error) => {
+                console.error('SSE Error:', error)
+                eventSource.close()
+                setLoading(false)
+            }
+
         } catch (error) {
             console.error('Error:', error)
-            // Mostrar datos técnicos incluso si falla el análisis de IA
-            setResult({
-                mac: mac.toUpperCase(),
-                technicalData: error.response?.technicalData || 'Error al obtener datos técnicos',
-                analysis: `Error al analizar: ${error.message}`,
-                timestamp: new Date().toISOString()
-            })
-            setActiveTab('technical')
-            alert(`Error: ${error.message}`)
-        } finally {
+            alert(`Error de conexión: ${error.message}`)
             setLoading(false)
         }
+    }
+
+    const downloadFile = (content, filename) => {
+        const element = document.createElement("a");
+        const file = new Blob([content], { type: 'text/plain' });
+        element.href = URL.createObjectURL(file);
+        element.download = filename;
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     }
 
     const analyzeBulk = async () => {
@@ -200,18 +230,27 @@ export default function WiFiAnalyzer() {
 
                 {mode === 'single' ? (
                     <div className="single-mode">
-                        <input
-                            type="text"
-                            placeholder="MAC Address (ej: 78EB46AB75CA)"
-                            value={mac}
-                            onChange={(e) => setMac(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && analyzeSingle()}
-                            maxLength={17}
-                            autoFocus
-                        />
-                        <button onClick={analyzeSingle} disabled={loading}>
-                            {loading ? '⏳ Analizando...' : '🔍 Analizar'}
-                        </button>
+                        <div className="input-group">
+                            <input
+                                type="text"
+                                placeholder="MAC Address (ej: 78EB46AB75CA)"
+                                value={mac}
+                                onChange={(e) => setMac(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && analyzeSingle()}
+                                maxLength={17}
+                                autoFocus
+                            />
+                            <button onClick={analyzeSingle} disabled={loading}>
+                                {loading ? '⏳ Analizando...' : '🔍 Analizar'}
+                            </button>
+                        </div>
+                        {loading && progress.length > 0 && (
+                            <div className="progress-log">
+                                {progress.map((msg, i) => (
+                                    <div key={i} className="progress-msg">{msg}</div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="bulk-mode">
@@ -264,14 +303,38 @@ export default function WiFiAnalyzer() {
 
                     <div className="tab-content">
                         {activeTab === 'report' && (
-                            <div className="report">
-                                <pre>{result.analysis}</pre>
+                            <div className="report-view">
+                                <div className="view-header">
+                                    <h3>📊 Informe Ejecutivo</h3>
+                                    <button
+                                        onClick={() => downloadFile(result.analysis, `informe_${result.mac}.txt`)}
+                                        className="download-btn"
+                                        disabled={!result.analysis}
+                                    >
+                                        💾 Guardar Informe
+                                    </button>
+                                </div>
+                                <div className="analysis-report">
+                                    {result.analysis || (loading ? 'Esperando informe de IA...' : 'Sin informe disponible')}
+                                </div>
                             </div>
                         )}
 
                         {activeTab === 'technical' && (
-                            <div className="technical">
-                                <pre>{result.technicalData}</pre>
+                            <div className="technical-view">
+                                <div className="view-header">
+                                    <h3>🔧 Datos Técnicos en Bruto</h3>
+                                    <button
+                                        onClick={() => downloadFile(result.technicalData, `datos_${result.mac}.txt`)}
+                                        className="download-btn"
+                                        disabled={!result.technicalData}
+                                    >
+                                        💾 Guardar Datos
+                                    </button>
+                                </div>
+                                <pre className="technical-data">
+                                    {result.technicalData || (loading ? 'Recopilando datos...' : 'Sin datos disponibles')}
+                                </pre>
                             </div>
                         )}
 

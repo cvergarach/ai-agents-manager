@@ -451,56 +451,196 @@ async function authenticateHuawei() {
   }
 }
 
-// Helper: Recopilar datos del gateway
-async function collectGatewayData(mac, token) {
+// Helper: Recopilar datos del gateway con streaming opcional
+async function collectGatewayDataStream(mac, token, onProgress) {
   const headers = {
     'X-Auth-Token': token,
     'Accept': 'application/json'
   };
 
   const baseUrl = process.env.HUAWEI_API_URL;
-  let data = `\n${'='.repeat(80)}\nANÁLISIS DE GATEWAY: ${mac}\n${'='.repeat(80)}\n`;
+  let technicalData = `\n${'='.repeat(80)}\nANÁLISIS DE GATEWAY: ${mac}\n${'='.repeat(80)}\n`;
+
+  const safeOnProgress = (msg) => {
+    if (onProgress) onProgress(msg);
+  };
 
   try {
-    // Información básica
-    const basicInfo = await axios.get(
-      `${baseUrl}/restconf/v1/data/huawei-nce-resource-activation-configuration-home-gateway:home-gateway/home-gateway-info`,
-      { params: { mac }, headers, httpsAgent, timeout: 15000 }
-    );
-    data += `\n\n===== INFORMACIÓN BÁSICA =====\n${JSON.stringify(basicInfo.data, null, 2)}`;
-
-    // Dispositivos conectados
-    const devices = await axios.get(
-      `${baseUrl}/restconf/v1/data/huawei-nce-resource-activation-configuration-home-gateway:home-gateway/sub-devices`,
-      { params: { mac }, headers, httpsAgent, timeout: 15000 }
-    );
-    data += `\n\n===== DISPOSITIVOS CONECTADOS =====\n${JSON.stringify(devices.data, null, 2)}`;
-
-    // Configuración WiFi
-    for (const band of ['2.4G', '5G']) {
-      const wifi = await axios.get(
-        `${baseUrl}/restconf/v1/data/huawei-nce-resource-activation-configuration-home-gateway:home-gateway/wifi-band`,
-        { params: { mac, 'radio-type': band }, headers, httpsAgent, timeout: 15000 }
+    // 1. Información básica
+    safeOnProgress('Consultando Información Básica...');
+    try {
+      const basicInfo = await axios.get(
+        `${baseUrl}/restconf/v1/data/huawei-nce-resource-activation-configuration-home-gateway:home-gateway/home-gateway-info`,
+        { params: { mac }, headers, httpsAgent, timeout: 15000 }
       );
-      data += `\n\n===== WIFI ${band} =====\n${JSON.stringify(wifi.data, null, 2)}`;
+      const chunk = `\n\n===== INFORMACIÓN BÁSICA =====\n${JSON.stringify(basicInfo.data, null, 2)}`;
+      technicalData += chunk;
+      safeOnProgress('Información básica obtenida.');
+    } catch (e) {
+      technicalData += `\n\n[ERROR] No se pudo obtener Información Básica: ${e.message}`;
+      safeOnProgress('⚠️ Error al obtener información básica.');
     }
 
-    // Puertos LAN
-    const ports = await axios.post(
-      `${baseUrl}/restconf/v1/operations/huawei-nce-resource-activation-configuration-home-gateway:query-gateway-downstream-port`,
-      { 'huawei-nce-resource-activation-configuration-home-gateway:input': { mac } },
-      { headers, httpsAgent, timeout: 15000 }
-    );
-    data += `\n\n===== PUERTOS LAN =====\n${JSON.stringify(ports.data, null, 2)}`;
+    // 2. Dispositivos conectados
+    safeOnProgress('Consultando Dispositivos Conectados...');
+    try {
+      const devices = await axios.get(
+        `${baseUrl}/restconf/v1/data/huawei-nce-resource-activation-configuration-home-gateway:home-gateway/sub-devices`,
+        { params: { mac }, headers, httpsAgent, timeout: 15000 }
+      );
+      const chunk = `\n\n===== DISPOSITIVOS CONECTADOS =====\n${JSON.stringify(devices.data, null, 2)}`;
+      technicalData += chunk;
+      safeOnProgress('Dispositivos conectados obtenidos.');
+    } catch (e) {
+      technicalData += `\n\n[ERROR] No se pudieron obtener Dispositivos Conectados: ${e.message}`;
+      safeOnProgress('⚠️ Error al obtener dispositivos.');
+    }
 
-    return data;
+    // 3. Configuración WiFi
+    for (const band of ['2.4G', '5G']) {
+      safeOnProgress(`Consultando Configuración WiFi ${band}...`);
+      try {
+        const wifi = await axios.get(
+          `${baseUrl}/restconf/v1/data/huawei-nce-resource-activation-configuration-home-gateway:home-gateway/wifi-band`,
+          { params: { mac, 'radio-type': band }, headers, httpsAgent, timeout: 15000 }
+        );
+        const chunk = `\n\n===== WIFI ${band} =====\n${JSON.stringify(wifi.data, null, 2)}`;
+        technicalData += chunk;
+        safeOnProgress(`Configuración WiFi ${band} obtenida.`);
+      } catch (e) {
+        technicalData += `\n\n[ERROR] No se pudo obtener WiFi ${band}: ${e.message}`;
+        safeOnProgress(`⚠️ Error al obtener WiFi ${band}.`);
+      }
+    }
+
+    // 4. Puertos LAN
+    safeOnProgress('Consultando Estado de Puertos LAN...');
+    try {
+      const ports = await axios.post(
+        `${baseUrl}/restconf/v1/operations/huawei-nce-resource-activation-configuration-home-gateway:query-gateway-downstream-port`,
+        { 'huawei-nce-resource-activation-configuration-home-gateway:input': { mac } },
+        { headers, httpsAgent, timeout: 15000 }
+      );
+      const chunk = `\n\n===== PUERTOS LAN =====\n${JSON.stringify(ports.data, null, 2)}`;
+      technicalData += chunk;
+      safeOnProgress('Estado de puertos LAN obtenido.');
+    } catch (e) {
+      technicalData += `\n\n[ERROR] No se pudieron obtener Puertos LAN: ${e.message}`;
+      safeOnProgress('⚠️ Error al obtener puertos LAN.');
+    }
+
+    return technicalData;
   } catch (error) {
-    console.error('Error recopilando datos:', error.message);
-    return data + `\n\n[ERROR] No se pudieron recopilar todos los datos: ${error.message}`;
+    console.error('Error fatal recopilando datos:', error.message);
+    safeOnProgress('❌ Error crítico en la recolección de datos.');
+    return technicalData + `\n\n[ERROR FATAL] ${error.message}`;
   }
 }
 
-// Analizar gateway individual
+// Retrocompatibilidad con la función anterior
+async function collectGatewayData(mac, token) {
+  return await collectGatewayDataStream(mac, token, null);
+}
+
+// Analizar gateway con progreso en tiempo real (SSE)
+app.get('/api/wifi/analyze-stream', async (req, res) => {
+  // Configurar headers para SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const sendEvent = (type, content) => {
+    res.write(`data: ${JSON.stringify({ type, content })}\n\n`);
+  };
+
+  try {
+    const { mac, token: supabaseToken } = req.query;
+
+    if (!mac || mac.length !== 12) {
+      sendEvent('error', 'MAC address inválida');
+      return res.end();
+    }
+
+    // Validar token manualmente (ya que SSE es GET y a veces los headers son complejos de pasar)
+    if (!supabaseToken) {
+      sendEvent('error', 'No autorizado');
+      return res.end();
+    }
+
+    const { data: { user }, error } = await supabase.auth.getUser(supabaseToken);
+    if (error || !user) {
+      sendEvent('error', 'Token inválido');
+      return res.end();
+    }
+
+    sendEvent('progress', 'Iniciando conexión con Huawei...');
+    const token = await authenticateHuawei();
+    sendEvent('progress', 'Conexión establecida.');
+
+    // Recopilar datos con streaming de progreso
+    const technicalData = await collectGatewayDataStream(mac, token, (msg) => {
+      sendEvent('progress', msg);
+    });
+
+    sendEvent('technicalData', technicalData);
+
+    sendEvent('progress', 'Generando informe con IA (Gemini 2.5 Flash)...');
+
+    // Analizar con Gemini
+    try {
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const prompt = `
+Actúa como ingeniero de redes senior. Analiza estos datos técnicos de un gateway y crea un informe ejecutivo claro para call center.
+
+REGLAS:
+- Usa TEXTO PLANO (sin markdown)
+- Emojis: ✅ (bueno), ⚠️ (advertencia), ❌ (crítico)
+- Lenguaje simple
+
+ESTRUCTURA:
+INFORME DE DIAGNÓSTICO - GATEWAY ${mac}
+
+ESTADO GENERAL
+[Estado con emoji y descripción]
+
+CALIDAD DE SEÑAL
+[Análisis de potencia óptica]
+
+DISPOSITIVOS CONECTADOS
+[Lista con detalles]
+
+CONFIGURACIÓN WIFI
+[2.4G y 5G]
+
+PROBLEMAS Y SOLUCIONES
+[Lista priorizada]
+
+DATOS TÉCNICOS:
+${technicalData}
+`;
+
+      const result = await model.generateContent(prompt);
+      const analysis = result.response.text();
+      sendEvent('analysis', analysis);
+      sendEvent('progress', '✅ Análisis completado con éxito.');
+    } catch (aiError) {
+      console.error('Error en Gemini:', aiError);
+      sendEvent('progress', '⚠️ Error en análisis de IA, pero los datos técnicos están disponibles.');
+      sendEvent('analysis', `Error al generar informe con IA: ${aiError.message}`);
+    }
+
+    sendEvent('done', { mac, timestamp: new Date().toISOString() });
+    res.end();
+
+  } catch (error) {
+    console.error('Error SSE WiFi:', error);
+    sendEvent('error', error.message);
+    res.end();
+  }
+});
+
+// Analizar gateway individual (Standard - mantenido para compatibilidad)
 app.post('/api/wifi/analyze', authenticateUser, async (req, res) => {
   try {
     const { mac } = req.body;

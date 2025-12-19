@@ -65,6 +65,12 @@
 .single-mode,
 .bulk-mode {
   display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.input-group {
+  display: flex;
   gap: 15px;
   align-items: center;
 }
@@ -156,6 +162,28 @@
   }
 }
 
+/* Progress Log */
+.progress-log {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #495057;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.progress-msg {
+  margin-bottom: 4px;
+}
+
+.progress-msg:last-child {
+  font-weight: 600;
+  color: #1976D2;
+}
+
 .results {
   background: white;
   border-radius: 12px;
@@ -197,24 +225,67 @@
   padding: 30px;
 }
 
-.report pre,
-.technical pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #212121;
-  margin: 0;
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eeeeee;
 }
 
-.technical pre {
+.view-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.download-btn {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #1976D2;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #1976D2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-btn:hover:not(:disabled) {
+  background: #1976D2;
+  color: white;
+  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
+}
+
+.download-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #bdbdbd;
+  color: #bdbdbd;
+}
+
+.analysis-report {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 15px;
+  color: #2c3e50;
+  padding: 10px;
+}
+
+.technical-data {
   font-family: 'Courier New', monospace;
-  background: #1e1e1e;
-  color: #00ff00;
-  padding: 20px;
+  background: #1e1e1e !important;
+  color: #00ff00 !important;
+  padding: 20px !important;
   border-radius: 8px;
   overflow-x: auto;
+  line-height: 1.4;
+  margin: 0;
 }
 
 .chat {
@@ -249,11 +320,6 @@
   border-left: 4px solid #4CAF50;
 }
 
-.message.error {
-  background: #FFEBEE;
-  border-left: 4px solid #F44336;
-}
-
 .message strong {
   display: block;
   margin-bottom: 8px;
@@ -261,7 +327,6 @@
   color: #212121;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .message p {
@@ -269,7 +334,6 @@
   white-space: pre-wrap;
   line-height: 1.6;
   color: #212121;
-  font-weight: 500;
 }
 
 .chat-input {
@@ -299,24 +363,6 @@
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
-}
-
-.chat-input button:hover {
-  background: #0D47A1;
-}
-
-.bulk-results {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.bulk-results h2 {
-  margin: 0 0 20px 0;
-  color: #212121;
-  font-size: 24px;
 }
 
 .bulk-results table {
@@ -332,23 +378,10 @@
   color: #757575;
   font-size: 13px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .bulk-results td {
   padding: 12px 16px;
   border-bottom: 1px solid #E0E0E0;
   font-size: 14px;
-}
-
-.bulk-results tr.success {
-  background: rgba(76, 175, 80, 0.05);
-}
-
-.bulk-results tr.error {
-  background: rgba(244, 67, 54, 0.05);
-}
-
-.bulk-results tr:hover {
-  background: rgba(25, 118, 210, 0.05);
 }
