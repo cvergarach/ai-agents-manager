@@ -529,6 +529,92 @@ async function collectGatewayDataStream(mac, token, onProgress) {
       safeOnProgress('⚠️ Error al obtener puertos LAN.');
     }
 
+    // 5. Datos de Rendimiento
+    safeOnProgress('Consultando Datos de Rendimiento (PM)...');
+    try {
+      const endTime = new Date();
+      const startTime = new Date(endTime.getTime() - 3600000); // 1 hora atrás
+      const pmData = await axios.post(
+        `${baseUrl}/restconf/v1/operations/huawei-nce-homeinsight-performance-management:query-history-pm-datas`,
+        {
+          "huawei-nce-homeinsight-performance-management:input": {
+            "query-indicator-groups": { "query-indicator-group": [{ "indicator-group-name": "QUALITY_ANALYSIS" }] },
+            "res-type-name": "HOME_NETWORK",
+            "gateway-list": [{ "gateway-mac": mac }],
+            "data-type": "ANALYSIS_BY_5MIN",
+            "start-time": startTime.toISOString().replace(/\.\d{3}/, ''),
+            "end-time": endTime.toISOString().replace(/\.\d{3}/, '')
+          }
+        },
+        { headers, httpsAgent, timeout: 20000 }
+      );
+      technicalData += `\n\n===== RENDIMIENTO =====\n${JSON.stringify(pmData.data, null, 2)}`;
+      safeOnProgress('Datos de rendimiento obtenidos.');
+    } catch (e) {
+      technicalData += `\n\n[ERROR] No se pudieron obtener Datos de Rendimiento: ${e.message}`;
+      safeOnProgress('⚠️ Error en datos de rendimiento.');
+    }
+
+    // 6. Redes Vecinas
+    for (const band of ['2.4G', '5G']) {
+      safeOnProgress(`Escaneando Redes Vecinas ${band}...`);
+      try {
+        const neighbors = await axios.get(
+          `${baseUrl}/restconf/v1/data/huawei-nce-resource-activation-configuration-home-gateway:home-gateway/neighbor-ssids`,
+          { params: { mac, 'radio-type': band }, headers, httpsAgent, timeout: 20000 }
+        );
+        technicalData += `\n\n===== REDES VECINAS ${band} =====\n${JSON.stringify(neighbors.data, null, 2)}`;
+        safeOnProgress(`Escaneo de redes ${band} completado.`);
+      } catch (e) {
+        technicalData += `\n\n[ERROR] No se pudieron obtener Redes Vecinas ${band}: ${e.message}`;
+        safeOnProgress(`⚠️ Error al escanear redes ${band}.`);
+      }
+    }
+
+    // 7. Eventos y Logs
+    safeOnProgress('Recuperando Historial de Eventos (Logs)...');
+    try {
+      const endTime = new Date();
+      const startTime = new Date(endTime.getTime() - (7 * 24 * 3600000)); // 7 días atrás
+
+      // Consultar en ventanas de 4 horas para evitar timeouts
+      let allEvents = [];
+      let currentStart = new Date(startTime);
+
+      while (currentStart < endTime) {
+        let currentEnd = new Date(currentStart.getTime() + (4 * 3600000));
+        if (currentEnd > endTime) currentEnd = endTime;
+
+        const startStr = currentStart.toISOString().split('.')[0] + 'Z';
+        const endStr = currentEnd.toISOString().split('.')[0] + 'Z';
+
+        try {
+          const eventsResp = await axios.get(
+            `${baseUrl}/restconf/v1/data/huawei-nce-streams-home-gateway:home-gateway/event-data`,
+            {
+              params: { mac, 'start-time': startStr, 'end-time': endStr },
+              headers, httpsAgent, timeout: 15000
+            }
+          );
+          const batch = eventsResp.data?.['huawei-nce-streams-home-gateway:event-data']?.['event-data-list'] || [];
+          allEvents = allEvents.concat(batch);
+        } catch (e) {
+          console.error(`Error en ventana SSE logs ${startStr}:`, e.message);
+        }
+        currentStart = currentEnd;
+      }
+
+      technicalData += `\n\n===== HISTORIAL DE EVENTOS (TOTAL: ${allEvents.length}) =====\n${JSON.stringify(allEvents, null, 2)}`;
+
+      const reboots = allEvents.filter(e => e['event-type'] === 'GATEWAY_ONLINE');
+      technicalData += `\n\n===== REINICIOS DETECTADOS: ${reboots.length} =====`;
+
+      safeOnProgress(`Historial de eventos obtenido (${allEvents.length} registros).`);
+    } catch (e) {
+      technicalData += `\n\n[ERROR] No se pudo obtener Historial de Eventos: ${e.message}`;
+      safeOnProgress('⚠️ Error al recuperar logs.');
+    }
+
     return technicalData;
   } catch (error) {
     console.error('Error fatal recopilando datos:', error.message);
@@ -612,6 +698,12 @@ DISPOSITIVOS CONECTADOS
 
 CONFIGURACIÓN WIFI
 [2.4G y 5G]
+
+ANÁLISIS DE INTERFERENCIA
+[Redes vecinas detectadas y saturación]
+
+EVENTOS Y REINICIOS
+[Resumen de incidencias y estabilidad]
 
 PROBLEMAS Y SOLUCIONES
 [Lista priorizada]
