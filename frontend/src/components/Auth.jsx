@@ -60,7 +60,7 @@ export default function Auth() {
 
       {/* Services Section */}
       <section className="dl-section" style={{ borderTop: '1px solid var(--dl-border)' }}>
-        <h2 className="dl-section-title">🚀 Nuestras Soluciones</h2>
+        <h2 className="dl-section-title">Nuestras Soluciones</h2>
         <div className="dl-grid">
           <div className="dl-card">
             <div className="dl-icon-container"><Zap size={24} /></div>
@@ -87,7 +87,7 @@ export default function Auth() {
 
       {/* Philosophy */}
       <section className="dl-section" style={{ background: 'rgba(255,255,255,0.01)' }}>
-        <h2 className="dl-section-title">🧠 Filosofía Datalive</h2>
+        <h2 className="dl-section-title">Filosofía Datalive</h2>
         <div className="dl-grid">
           <div className="dl-card">
             <CheckCircle2 color="var(--dl-primary)" style={{ marginBottom: '16px' }} />
@@ -109,7 +109,7 @@ export default function Auth() {
 
       {/* Methodology Section */}
       <section className="dl-section">
-        <h2 className="dl-section-title">🔧 Cómo trabajamos</h2>
+        <h2 className="dl-section-title">Cómo trabajamos</h2>
         <div className="dl-grid dl-grid-method">
           <div className="dl-step-item">
             <div className="dl-step-number">01</div>
