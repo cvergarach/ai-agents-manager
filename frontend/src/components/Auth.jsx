@@ -30,7 +30,9 @@ export default function Auth() {
     <div className="dl-landing-page">
       {/* Navbar */}
       <nav className="dl-navbar">
-        <div className="dl-logo">DATALIVE</div>
+        <div className="dl-logo">
+          <img src="/assets/datalive-logo.png" alt="DATALIVE" className="dl-logo-img" />
+        </div>
         <button className="dl-google-btn" onClick={handleGoogleLogin} style={{ padding: '8px 18px', fontSize: '13px' }}>
           Ingresar
         </button>

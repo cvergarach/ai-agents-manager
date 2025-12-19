@@ -45,6 +45,17 @@
     color: white;
 }
 
+.dl-logo {
+    display: flex;
+    align-items: center;
+}
+
+.dl-logo-img {
+    height: 40px;
+    width: auto;
+    display: block;
+}
+
 /* Hero Section */
 .dl-hero {
     padding: 160px 5% 80px;
