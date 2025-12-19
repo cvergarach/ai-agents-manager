@@ -5,6 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import axios from 'axios';
+import https from 'https';
 
 dotenv.config();
 
@@ -55,7 +57,7 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware de autenticación
 const authenticateUser = async (req, res, next) => {
   const authHeader = req.headers.authorization;
-  
+
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'No autorizado' });
   }
@@ -64,7 +66,7 @@ const authenticateUser = async (req, res, next) => {
 
   try {
     const { data: { user }, error } = await supabase.auth.getUser(token);
-    
+
     if (error || !user) {
       return res.status(401).json({ error: 'Token inválido' });
     }
@@ -82,8 +84,8 @@ const authenticateUser = async (req, res, next) => {
 // ============================================
 
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     message: 'API funcionando correctamente',
     timestamp: new Date().toISOString()
   });
@@ -141,16 +143,16 @@ app.post('/api/agents', authenticateUser, async (req, res) => {
     const { name, description, system_prompt, model, temperature, max_tokens } = req.body;
 
     if (!name || !system_prompt || !model) {
-      return res.status(400).json({ 
-        error: 'El nombre, prompt del sistema y modelo son obligatorios' 
+      return res.status(400).json({
+        error: 'El nombre, prompt del sistema y modelo son obligatorios'
       });
     }
 
     // Validar que el modelo sea válido
     const validModels = ['claude-3-5-sonnet-20241022', 'gpt-4', 'gemini-2.5-flash'];
     if (!validModels.includes(model)) {
-      return res.status(400).json({ 
-        error: `Modelo inválido. Debe ser uno de: ${validModels.join(', ')}` 
+      return res.status(400).json({
+        error: `Modelo inválido. Debe ser uno de: ${validModels.join(', ')}`
       });
     }
 
@@ -328,7 +330,7 @@ app.post('/api/chat', authenticateUser, async (req, res) => {
     } else if (agent.model === 'gemini-2.5-flash') {
       // Gemini
       const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-      
+
       // Gemini necesita formato diferente
       const chat = model.startChat({
         history: history.slice(0, -1).map(msg => ({
@@ -363,9 +365,9 @@ app.post('/api/chat', authenticateUser, async (req, res) => {
 
   } catch (error) {
     console.error('Error en el chat:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Error al procesar el mensaje',
-      details: error.message 
+      details: error.message
     });
   }
 });
@@ -418,6 +420,230 @@ app.get('/api/conversations/:id/messages', authenticateUser, async (req, res) =>
   } catch (error) {
     console.error('Error al obtener mensajes:', error);
     res.status(500).json({ error: 'Error al obtener mensajes' });
+  }
+});
+
+// ============================================
+// RUTAS DE WIFI ANALYZER
+// ============================================
+
+// Configuración para ignorar SSL (Huawei API)
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false
+});
+
+// Helper: Autenticar con Huawei API
+async function authenticateHuawei() {
+  try {
+    const response = await axios.put(
+      `${process.env.HUAWEI_API_URL}/rest/plat/smapp/v1/sessions`,
+      {
+        grantType: 'password',
+        userName: process.env.HUAWEI_USERNAME,
+        value: process.env.HUAWEI_PASSWORD
+      },
+      { httpsAgent, timeout: 10000 }
+    );
+    return response.data.accessSession;
+  } catch (error) {
+    console.error('Error autenticando con Huawei:', error.message);
+    throw new Error('No se pudo autenticar con la API de Huawei');
+  }
+}
+
+// Helper: Recopilar datos del gateway
+async function collectGatewayData(mac, token) {
+  const headers = {
+    'X-Auth-Token': token,
+    'Accept': 'application/json'
+  };
+
+  const baseUrl = process.env.HUAWEI_API_URL;
+  let data = `\n${'='.repeat(80)}\nANÁLISIS DE GATEWAY: ${mac}\n${'='.repeat(80)}\n`;
+
+  try {
+    // Información básica
+    const basicInfo = await axios.get(
+      `${baseUrl}/restconf/v1/data/huawei-nce-resource-activation-configuration-home-gateway:home-gateway/home-gateway-info`,
+      { params: { mac }, headers, httpsAgent, timeout: 15000 }
+    );
+    data += `\n\n===== INFORMACIÓN BÁSICA =====\n${JSON.stringify(basicInfo.data, null, 2)}`;
+
+    // Dispositivos conectados
+    const devices = await axios.get(
+      `${baseUrl}/restconf/v1/data/huawei-nce-resource-activation-configuration-home-gateway:home-gateway/sub-devices`,
+      { params: { mac }, headers, httpsAgent, timeout: 15000 }
+    );
+    data += `\n\n===== DISPOSITIVOS CONECTADOS =====\n${JSON.stringify(devices.data, null, 2)}`;
+
+    // Configuración WiFi
+    for (const band of ['2.4G', '5G']) {
+      const wifi = await axios.get(
+        `${baseUrl}/restconf/v1/data/huawei-nce-resource-activation-configuration-home-gateway:home-gateway/wifi-band`,
+        { params: { mac, 'radio-type': band }, headers, httpsAgent, timeout: 15000 }
+      );
+      data += `\n\n===== WIFI ${band} =====\n${JSON.stringify(wifi.data, null, 2)}`;
+    }
+
+    // Puertos LAN
+    const ports = await axios.post(
+      `${baseUrl}/restconf/v1/operations/huawei-nce-resource-activation-configuration-home-gateway:query-gateway-downstream-port`,
+      { 'huawei-nce-resource-activation-configuration-home-gateway:input': { mac } },
+      { headers, httpsAgent, timeout: 15000 }
+    );
+    data += `\n\n===== PUERTOS LAN =====\n${JSON.stringify(ports.data, null, 2)}`;
+
+    return data;
+  } catch (error) {
+    console.error('Error recopilando datos:', error.message);
+    return data + `\n\n[ERROR] No se pudieron recopilar todos los datos: ${error.message}`;
+  }
+}
+
+// Analizar gateway individual
+app.post('/api/wifi/analyze', authenticateUser, async (req, res) => {
+  try {
+    const { mac } = req.body;
+
+    if (!mac || mac.length !== 12) {
+      return res.status(400).json({ error: 'MAC address inválida' });
+    }
+
+    // Autenticar con Huawei
+    const token = await authenticateHuawei();
+
+    // Recopilar datos
+    const technicalData = await collectGatewayData(mac, token);
+
+    // Analizar con Gemini
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+    const prompt = `
+Actúa como ingeniero de redes senior. Analiza estos datos técnicos de un gateway y crea un informe ejecutivo claro para call center.
+
+REGLAS:
+- Usa TEXTO PLANO (sin markdown)
+- Emojis: ✅ (bueno), ⚠️ (advertencia), ❌ (crítico)
+- Lenguaje simple
+
+ESTRUCTURA:
+INFORME DE DIAGNÓSTICO - GATEWAY ${mac}
+
+ESTADO GENERAL
+[Estado con emoji y descripción]
+
+CALIDAD DE SEÑAL
+[Análisis de potencia óptica]
+
+DISPOSITIVOS CONECTADOS
+[Lista con detalles]
+
+CONFIGURACIÓN WIFI
+[2.4G y 5G]
+
+PROBLEMAS Y SOLUCIONES
+[Lista priorizada]
+
+DATOS TÉCNICOS:
+${technicalData}
+`;
+
+    const result = await model.generateContent(prompt);
+    const analysis = result.response.text();
+
+    res.json({
+      mac,
+      technicalData,
+      analysis,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error en análisis WiFi:', error);
+    res.status(500).json({
+      error: 'Error al analizar gateway',
+      details: error.message
+    });
+  }
+});
+
+// Análisis masivo
+app.post('/api/wifi/analyze-bulk', authenticateUser, async (req, res) => {
+  try {
+    const { macs } = req.body;
+
+    if (!Array.isArray(macs) || macs.length === 0) {
+      return res.status(400).json({ error: 'Se requiere un array de MACs' });
+    }
+
+    const token = await authenticateHuawei();
+    const results = [];
+
+    for (const mac of macs) {
+      try {
+        const technicalData = await collectGatewayData(mac, token);
+
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        const prompt = `Analiza brevemente este gateway ${mac}:\n\n${technicalData}`;
+        const result = await model.generateContent(prompt);
+
+        results.push({
+          mac,
+          status: 'success',
+          analysis: result.response.text(),
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        results.push({
+          mac,
+          status: 'error',
+          error: error.message,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+
+    res.json({ results });
+
+  } catch (error) {
+    console.error('Error en análisis masivo:', error);
+    res.status(500).json({ error: 'Error en análisis masivo' });
+  }
+});
+
+// Chat con datos del gateway
+app.post('/api/wifi/chat', authenticateUser, async (req, res) => {
+  try {
+    const { question, context, history } = req.body;
+
+    if (!question || !context) {
+      return res.status(400).json({ error: 'Se requiere pregunta y contexto' });
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+    const prompt = `
+Eres un asistente experto en redes. Responde basándote ÚNICAMENTE en los datos técnicos.
+
+HISTORIAL:
+${history || 'Sin historial previo'}
+
+DATOS TÉCNICOS:
+${context}
+
+PREGUNTA: ${question}
+
+RESPUESTA (texto plano, sin markdown):
+`;
+
+    const result = await model.generateContent(prompt);
+    const answer = result.response.text();
+
+    res.json({ answer });
+
+  } catch (error) {
+    console.error('Error en chat WiFi:', error);
+    res.status(500).json({ error: 'Error en chat' });
   }
 });
 

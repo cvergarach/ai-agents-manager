@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import Auth from './components/Auth'
 import Dashboard from './pages/Dashboard'
+import WiFiAnalyzer from './pages/WiFiAnalyzer'
 import './styles/App.css'
 
 export default function App() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState('dashboard')
 
   useEffect(() => {
     // Obtener sesión inicial
@@ -22,7 +24,25 @@ export default function App() {
       setSession(session)
     })
 
-    return () => subscription.unsubscribe()
+    // Simple routing
+    const path = window.location.pathname
+    if (path === '/wifi') {
+      setCurrentPage('wifi')
+    } else {
+      setCurrentPage('dashboard')
+    }
+
+    // Listen to popstate for back/forward navigation
+    const handlePopState = () => {
+      const path = window.location.pathname
+      setCurrentPage(path === '/wifi' ? 'wifi' : 'dashboard')
+    }
+    window.addEventListener('popstate', handlePopState)
+
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener('popstate', handlePopState)
+    }
   }, [])
 
   if (loading) {
@@ -33,9 +53,14 @@ export default function App() {
     )
   }
 
-  return (
-    <>
-      {!session ? <Auth /> : <Dashboard />}
-    </>
-  )
+  if (!session) {
+    return <Auth />
+  }
+
+  // Render based on current page
+  if (currentPage === 'wifi') {
+    return <WiFiAnalyzer />
+  }
+
+  return <Dashboard />
 }

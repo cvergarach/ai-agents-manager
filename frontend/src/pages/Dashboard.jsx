@@ -95,6 +95,9 @@ export default function Dashboard() {
           <p>Hola, {user?.user_metadata?.full_name || user?.email}</p>
         </div>
         <div className="header-actions">
+          <button onClick={() => window.location.href = '/wifi'} className="btn btn-secondary">
+            🌐 WiFi Analyzer
+          </button>
           <button onClick={handleCreateAgent} className="btn btn-primary">
             <Plus size={20} />
             Nuevo Agente
