@@ -1,12 +1,13 @@
 /* DL prefix is used to avoid collisions with global App.css */
 .dl-landing-page {
-    --dl-bg: #020617;
-    --dl-surface: #0f172a;
+    --dl-bg: #06090f;
+    /* Matched to the logo image background */
+    --dl-surface: #0d1117;
     --dl-border: #1e293b;
     --dl-primary: #3b82f6;
     --dl-text-main: #f8fafc;
     --dl-text-alt: #94a3b8;
-    --dl-nav-h: 72px;
+    --dl-nav-h: 80px;
 
     min-height: 100vh;
     background-color: var(--dl-bg) !important;
@@ -24,12 +25,12 @@
 /* Navbar */
 .dl-navbar {
     height: var(--dl-nav-h);
-    display: flex !important;
-    justify-content: space-between;
+    display: grid !important;
+    grid-template-columns: 100px 1fr 100px;
+    /* Split for centering */
     align-items: center;
     padding: 0 5%;
-    background: rgba(2, 6, 23, 0.9);
-    backdrop-filter: blur(12px);
+    background: var(--dl-bg);
     position: fixed;
     top: 0;
     left: 0;
@@ -39,19 +40,23 @@
 }
 
 .dl-logo {
-    font-size: 20px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
+    grid-column: 2;
+    /* Forces center in grid */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.dl-logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
     color: white;
 }
 
-.dl-logo {
-    display: flex;
-    align-items: center;
-}
-
 .dl-logo-img {
-    height: 40px;
+    height: 32px;
     width: auto;
     display: block;
 }

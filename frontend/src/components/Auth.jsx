@@ -30,12 +30,16 @@ export default function Auth() {
     <div className="dl-landing-page">
       {/* Navbar */}
       <nav className="dl-navbar">
+        <div /> {/* Spacer for grid alignment */}
         <div className="dl-logo">
-          <img src="/assets/datalive-logo.png" alt="DATALIVE" className="dl-logo-img" />
+          <img src="/assets/datalive-logo.png" alt="Logo" className="dl-logo-img" />
+          <span className="dl-logo-text">DATALIVE</span>
         </div>
-        <button className="dl-google-btn" onClick={handleGoogleLogin} style={{ padding: '8px 18px', fontSize: '13px' }}>
-          Ingresar
-        </button>
+        <div className="dl-nav-right">
+          <button className="dl-google-btn" onClick={handleGoogleLogin} style={{ padding: '8px 18px', fontSize: '13px' }}>
+            Ingresar
+          </button>
+        </div>
       </nav>
 
       {/* Hero Section */}
