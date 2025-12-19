@@ -28,44 +28,31 @@ export default function Auth() {
 
   return (
     <div className="dl-landing-page">
-      {/* Navbar matching Mockup */}
+      {/* Navbar */}
       <nav className="dl-navbar">
-        <div className="dl-nav-left">
-          <Zap size={18} color="#3b82f6" />
-          <span className="dl-nav-logo-text">DATA LIVE</span>
+        <div /> {/* Spacer for grid alignment */}
+        <div className="dl-logo">
+          <img src="/assets/datalive-logo.png" alt="Logo" className="dl-logo-img" />
+          <span className="dl-logo-text">DATALIVE</span>
         </div>
-        <div className="dl-nav-links">
-          <a href="#soluciones" className="dl-nav-link">SOLUCIONES</a>
-          <a href="#filosofia" className="dl-nav-link">FILOSOFÍA</a>
-          <a href="#metodo" className="dl-nav-link">MÉTODO</a>
-          <button className="dl-btn-ingresar" onClick={handleGoogleLogin}>INGRESAR</button>
+        <div className="dl-nav-right">
+          <button className="dl-google-btn" onClick={handleGoogleLogin} style={{ padding: '8px 18px', fontSize: '13px' }}>
+            Ingresar
+          </button>
         </div>
       </nav>
 
-      {/* Hero Section matching Mockup */}
+      {/* Hero Section */}
       <header className="dl-hero">
-        <div className="dl-badge">
-          <span style={{ color: '#3b82f6' }}>●</span> INTELIGENCIA ARTIFICIAL APLICADA
-        </div>
-
-        <img src="/assets/datalive-logo.png" alt="Wave Logo" className="dl-hero-logo" />
-
-        <h1 className="dl-hero-title">
-          DATA<span>LIVE</span>
-        </h1>
-
-        <h2 className="dl-tagline">
-          Datos e IA que <br />
-          <span className="dl-gradient-text">trabajan para ti.</span>
-        </h2>
-
+        <div className="dl-tag">Inteligencia Artificial Aplicada</div>
+        <h1>Datos e Inteligencia Artificial que <span className="highlight">trabajan para tu negocio</span></h1>
         <p className="dl-hero-desc">
-          Transformamos flujos complejos de información en decisiones estratégicas mediante automatización inteligente y analítica avanzada.
+          En Datalive transformamos datos en decisiones reales mediante IA avanzada, automatización y analítica predictiva. Construimos soluciones de alto impacto.
         </p>
 
-        <div className="dl-hero-actions">
-          <button onClick={handleGoogleLogin} disabled={loading} className="dl-btn-google">
-            <svg viewBox="0 0 24 24" width="18" height="18">
+        <div className="dl-login-wrapper">
+          <button onClick={handleGoogleLogin} disabled={loading} className="dl-google-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -73,9 +60,8 @@ export default function Auth() {
             </svg>
             {loading ? 'Iniciando sesión...' : 'Continuar con Google'}
           </button>
-          <button className="dl-btn-secondary">Ver Soluciones</button>
         </div>
-        {error && <div style={{ color: '#f87171', marginTop: '20px' }}>{error}</div>}
+        {error && <div style={{ color: '#f87171', marginTop: '-20px', marginBottom: '40px' }}>{error}</div>}
       </header>
 
       {/* Solutions Grid */}
