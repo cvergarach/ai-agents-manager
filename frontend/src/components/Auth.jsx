@@ -45,9 +45,12 @@ export default function Auth() {
       {/* Hero Section */}
       <header className="dl-hero">
         <div className="dl-tag">Inteligencia Artificial Aplicada</div>
-        <h1>Datos e Inteligencia Artificial que <span className="highlight">trabajan para tu negocio</span></h1>
+        <h1 className="dl-brand-title">DATALIVE</h1>
+        <p className="dl-hero-tagline">
+          Datos e Inteligencia Artificial que <span className="highlight">trabajan para tu negocio</span>
+        </p>
         <p className="dl-hero-desc">
-          En Datalive transformamos datos en decisiones reales mediante IA avanzada, automatización y analítica predictiva. Construimos soluciones de alto impacto.
+          Transformamos datos en decisiones reales mediante IA avanzada, automatización y analítica predictiva de alto impacto.
         </p>
 
         <div className="dl-login-wrapper">
