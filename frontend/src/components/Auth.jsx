@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Rocket, Brain, BarChart3, Database, Zap, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react'
+import { Brain, BarChart3, Database, Zap, CheckCircle2 } from 'lucide-react'
 import '../styles/Auth.css'
 
 export default function Auth() {
@@ -31,23 +31,23 @@ export default function Auth() {
       {/* Navbar */}
       <nav className="nav-container">
         <div className="logo">DATALIVE</div>
-        <button className="google-login-btn" onClick={handleGoogleLogin} style={{ width: 'auto', padding: '10px 20px' }}>
+        <button className="google-login-btn" onClick={handleGoogleLogin} style={{ padding: '8px 20px', fontSize: '14px' }}>
           Ingresar
         </button>
       </nav>
 
       {/* Hero Section */}
-      <section className="hero-section">
+      <header className="hero-content">
         <div className="hero-tag">Inteligencia Artificial Aplicada</div>
         <h1>Datos e Inteligencia Artificial que <span className="highlight">trabajan para tu negocio</span></h1>
-        <p className="hero-description">
-          En Datalive ayudamos a empresas a transformar datos en decisiones reales.
-          No vendemos promesas: construimos soluciones que funcionan y generan impacto.
+        <p className="hero-desc">
+          Transformamos datos en decisiones reales mediante IA avanzada, automatización y analítica predictiva.
+          Soluciones con impacto directo en tus resultados.
         </p>
 
-        <div className="login-block">
+        <div className="login-area">
           <button onClick={handleGoogleLogin} disabled={loading} className="google-login-btn">
-            <svg viewBox="0 0 24 24" width="24" height="24">
+            <svg viewBox="0 0 24 24" width="20" height="20">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -55,133 +55,100 @@ export default function Auth() {
             </svg>
             {loading ? 'Iniciando sesión...' : 'Continuar con Google'}
           </button>
-          {error && <div className="error-message" style={{ marginTop: '20px' }}>{error}</div>}
         </div>
-      </section>
+        {error && <div className="error-message" style={{ color: '#ef4444', fontSize: '14px' }}>{error}</div>}
+      </header>
 
-      {/* Qué hacemos Section */}
-      <section className="benefits-section">
-        <div className="section-container">
-          <div className="section-header">
-            <div className="hero-tag">🚀 ¿Qué hacemos?</div>
-            <h2>Soluciones que se integran y escalan</h2>
-            <p className="hero-description" style={{ textAlign: 'left', margin: '0' }}>
-              Diseñamos e implementamos soluciones de IA y datos que atacan problemas concretos del negocio.
-            </p>
-          </div>
-
-          <div className="benefit-list">
-            <div className="benefit-item">
-              <div className="benefit-icon"><Zap size={24} /></div>
-              <div className="benefit-content">
-                <h4>Automatización Inteligente</h4>
-                <p>Procesos optimizados mediante algoritmos de IA.</p>
-              </div>
-            </div>
-            <div className="benefit-item">
-              <div className="benefit-icon"><Brain size={24} /></div>
-              <div className="benefit-content">
-                <h4>Asistentes y Agentes</h4>
-                <p>Agentes de IA para operaciones y atención al cliente.</p>
-              </div>
-            </div>
-            <div className="benefit-item">
-              <div className="benefit-icon"><BarChart3 size={24} /></div>
-              <div className="benefit-content">
-                <h4>Análisis en Tiempo Real</h4>
-                <p>Monitorización técnica y dashboards ejecutivos.</p>
-              </div>
-            </div>
-            <div className="benefit-item">
-              <div className="benefit-icon"><Database size={24} /></div>
-              <div className="benefit-content">
-                <h4>Integración de Datos</h4>
-                <p>Conexión fluida con ERP, CRM y bases de datos.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Filosofía Section */}
-      <section className="hero-section" style={{ background: 'transparent' }}>
-        <div className="hero-tag">🧠 Nuestra filosofía</div>
-        <h2>La tecnología debe ser útil</h2>
-
+      {/* Services Grid */}
+      <section className="section-wrap" style={{ borderTop: '1px solid var(--dl-border)' }}>
+        <h2 className="section-title">🚀 Nuestras Soluciones</h2>
         <div className="features-grid">
-          <div className="feature-card">
-            <CheckCircle2 color="#00F2FF" style={{ marginBottom: '20px' }} />
-            <h3>Simple de usar</h3>
-            <p>Interfaces intuitivas que eliminan la fricción tecnológica.</p>
+          <div className="card">
+            <Zap className="card-icon" size={24} />
+            <h4>Automatización Inteligente</h4>
+            <p>Optimizamos procesos operativos reduciendo costos y errores manuales.</p>
           </div>
-          <div className="feature-card">
-            <CheckCircle2 color="#00F2FF" style={{ marginBottom: '20px' }} />
-            <h3>Útil desde el día uno</h3>
-            <p>Resultados tangibles y medibles de forma inmediata.</p>
+          <div className="card">
+            <Brain className="card-icon" size={24} />
+            <h4>Agentes de IA</h4>
+            <p>Sistemas conversacionales avanzados para atención y soporte técnico.</p>
           </div>
-          <div className="feature-card">
-            <CheckCircle2 color="#00F2FF" style={{ marginBottom: '20px' }} />
-            <h3>Escalable</h3>
-            <p>Sistemas diseñados para crecer sin necesidad de rehacer todo.</p>
+          <div className="card">
+            <BarChart3 className="card-icon" size={24} />
+            <h4>Analítica Predictiva</h4>
+            <p>Dashboards en tiempo real para anticipar tendencias y comportamientos.</p>
           </div>
-        </div>
-      </section>
-
-      {/* Cómo trabajamos */}
-      <section className="benefits-section" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
-        <div className="section-container">
-          <div className="section-header">
-            <div className="hero-tag">🔧 Cómo trabajamos</div>
-            <h2>Metodología orientada a resultados</h2>
-          </div>
-          <div className="benefit-list">
-            <div className="benefit-item">
-              <div className="benefit-icon">1</div>
-              <div className="benefit-content">
-                <h4>Entendemos tu problema</h4>
-                <p>No partimos desde la tecnología, sino desde la necesidad.</p>
-              </div>
-            </div>
-            <div className="benefit-item">
-              <div className="benefit-icon">2</div>
-              <div className="benefit-content">
-                <h4>Diseñamos un MVP</h4>
-                <p>Solución mínima viable para validar rápido.</p>
-              </div>
-            </div>
-            <div className="benefit-item">
-              <div className="benefit-icon">3</div>
-              <div className="benefit-content">
-                <h4>Implementamos y Medimos</h4>
-                <p>Ejecución rápida con monitorización de impacto.</p>
-              </div>
-            </div>
-            <div className="benefit-item">
-              <div className="benefit-icon">4</div>
-              <div className="benefit-content">
-                <h4>Escalamos</h4>
-                <p>Expandimos la solución solo si genera valor real.</p>
-              </div>
-            </div>
+          <div className="card">
+            <Database className="card-icon" size={24} />
+            <h4>Integración de Datos</h4>
+            <p>Conectamos silos de información (ERP, CRM) en una sola fuente de verdad.</p>
           </div>
         </div>
       </section>
 
-      {/* Quote Section */}
-      <section className="quote-section">
-        <div className="quote-container">
-          <p className="quote-text">
-            “Cuando quieres algo, todo el universo conspira para que lo consigas.”
-          </p>
-          <p className="quote-author">— Paulo Coelho</p>
-          <p style={{ marginTop: '40px', color: '#94a3b8' }}>
-            En Datalive creemos que la claridad y la acción son esa conspiración.
-          </p>
+      {/* Philosophy */}
+      <section className="section-wrap">
+        <h2 className="section-title">🧠 Filosofía Datalive</h2>
+        <div className="features-grid">
+          <div className="card">
+            <CheckCircle2 className="card-icon" size={20} />
+            <h4>Útil desde el día 1</h4>
+            <p>Implementación rápida orientada a resultados tangibles.</p>
+          </div>
+          <div className="card">
+            <CheckCircle2 className="card-icon" size={20} />
+            <h4>Simple y Adoptable</h4>
+            <p>Tecnología compleja con interfaces fáciles de usar.</p>
+          </div>
+          <div className="card">
+            <CheckCircle2 className="card-icon" size={20} />
+            <h4>Escalable</h4>
+            <p>Construimos sobre bases sólidas que crecen con tu negocio.</p>
+          </div>
         </div>
       </section>
 
-      <footer style={{ padding: '40px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', color: '#64748b' }}>
-        &copy; {new Date().getFullYear()} Datalive. Todos los derechos reservados.
+      {/* Methodology */}
+      <section className="section-wrap" style={{ background: 'rgba(255,255,255,0.01)' }}>
+        <h2 className="section-title">🔧 Cómo trabajamos</h2>
+        <div className="split-grid">
+          <div className="step">
+            <div className="step-num">01</div>
+            <div>
+              <h4>Entendimiento</h4>
+              <p>Detectamos el problema de negocio antes de la tecnología.</p>
+            </div>
+          </div>
+          <div className="step">
+            <div className="step-num">02</div>
+            <div>
+              <h4>MVP</h4>
+              <p>Diseñamos la solución mínima de alto impacto.</p>
+            </div>
+          </div>
+          <div className="step">
+            <div className="step-num">03</div>
+            <div>
+              <h4>Medición</h4>
+              <p>Validamos resultados con datos reales y KPIs.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Quote */}
+      <section className="quote-box">
+        <p className="quote-text">
+          “Cuando quieres algo, todo el universo conspira para que lo consigas.”
+        </p>
+        <p className="quote-author">— Paulo Coelho</p>
+        <p style={{ marginTop: '32px', color: 'var(--dl-text-alt)', fontSize: '15px' }}>
+          La claridad y la acción son esa conspiración.
+        </p>
+      </section>
+
+      <footer className="dl-footer">
+        &copy; {new Date().getFullYear()} Datalive. IA y Datos al servicio del negocio.
       </footer>
     </div>
   )
