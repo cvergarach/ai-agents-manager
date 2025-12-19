@@ -516,7 +516,7 @@ app.post('/api/wifi/analyze', authenticateUser, async (req, res) => {
     const technicalData = await collectGatewayData(mac, token);
 
     // Analizar con Gemini
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `
 Actúa como ingeniero de redes senior. Analiza estos datos técnicos de un gateway y crea un informe ejecutivo claro para call center.
@@ -583,7 +583,7 @@ app.post('/api/wifi/analyze-bulk', authenticateUser, async (req, res) => {
       try {
         const technicalData = await collectGatewayData(mac, token);
 
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
         const prompt = `Analiza brevemente este gateway ${mac}:\n\n${technicalData}`;
         const result = await model.generateContent(prompt);
 
@@ -620,7 +620,7 @@ app.post('/api/wifi/chat', authenticateUser, async (req, res) => {
       return res.status(400).json({ error: 'Se requiere pregunta y contexto' });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `
 Eres un asistente experto en redes. Responde basándote ÚNICAMENTE en los datos técnicos.
